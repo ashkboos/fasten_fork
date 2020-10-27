@@ -1,8 +1,8 @@
 package eu.fasten.analyzer.restapiplugin.api.mvn;
 
 import eu.fasten.analyzer.restapiplugin.api.RestApplication;
-import eu.fasten.analyzer.restapiplugin.api.mvn.impl.FileApiServiceImpl;
 
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -11,7 +11,8 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.TEXT_PLAIN)
 public class FileApi {
 
-    FileApiService service = new FileApiServiceImpl();
+    @Inject
+    FileApiService service;
 
     @GET
     @Path("/{pkg}/{pkg_ver}/files")

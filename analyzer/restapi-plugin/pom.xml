@@ -22,7 +22,8 @@
     <properties>
         <resteasy.version>4.5.8.Final</resteasy.version>
         <servlet-api.version>4.0.1</servlet-api.version>
-        <jetty.version>9.4.9.v20180320</jetty.version>
+        <jetty.version>9.4.33.v20201020</jetty.version>
+        <weld.version>2.4.8.Final</weld.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
     </properties>
 
@@ -69,10 +70,52 @@
             <version>${jetty.version}</version>
         </dependency>
 
+        <!-- CDI -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-cdi</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-cdi</artifactId>
+            <version>${resteasy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet</artifactId>
+            <version>${weld.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
+<!--            &lt;!&ndash; CDI &ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.eclipse.jetty</groupId>-->
+<!--                <artifactId>jetty-maven-plugin</artifactId>-->
+<!--                <version>9.4.9.v20180320</version>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.jboss.weld.servlet</groupId>-->
+<!--                        <artifactId>weld-servlet</artifactId>-->
+<!--                        <version>${weld.version}</version>-->
+<!--                        <type>jar</type>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

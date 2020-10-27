@@ -20,11 +20,14 @@ package eu.fasten.analyzer.restapiplugin;
 
 import eu.fasten.core.data.metadatadb.MetadataDao;
 import eu.fasten.core.plugins.DBConnector;
+import org.eclipse.jetty.cdi.CdiDecoratingListener;
+import org.eclipse.jetty.cdi.CdiServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
+import org.jboss.weld.environment.servlet.EnhancedListener;
 import org.jooq.DSLContext;
 import org.pf4j.Extension;
 import org.pf4j.Plugin;
@@ -85,10 +88,15 @@ public class RestAPIPlugin extends Plugin {
          * @param port REST server port.
          */
         public RestAPIExtension(int port) {
+
             logger.info("Setting up the REST server...");
+
+            // Server setup
             SERVER_PORT = port;
             server = new Server(SERVER_PORT);
             final ServletContextHandler context = new ServletContextHandler(server, CONTEXT_ROOT);
+
+            // RESTeasy
             final ServletHolder restEasyServlet = new ServletHolder(new HttpServletDispatcher());
             restEasyServlet.setInitParameter("resteasy.servlet.mapping.prefix", APPLICATION_PATH);
             restEasyServlet.setInitParameter("javax.ws.rs.Application",
@@ -96,6 +104,13 @@ public class RestAPIPlugin extends Plugin {
             context.addServlet(restEasyServlet, APPLICATION_PATH + "/*");
             final ServletHolder defaultServlet = new ServletHolder(new DefaultServlet()); // default at context root
             context.addServlet(defaultServlet, CONTEXT_ROOT);
+
+            // Weld CDI
+            context.setInitParameter(
+                    CdiServletContainerInitializer.CDI_INTEGRATION_ATTRIBUTE, CdiDecoratingListener.MODE);
+            context.addBean(new ServletContextHandler.Initializer(context, new EnhancedListener()));
+            context.addBean(new ServletContextHandler.Initializer(context, new CdiServletContainerInitializer()));
+
             logger.info("...REST server configuration done.");
         }
 
