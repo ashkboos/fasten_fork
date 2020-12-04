@@ -72,7 +72,9 @@ public class TestInternal {
 		for(Revision d: dependencySet) deps.add(d.id);
 
 		DatabaseMerger dm = new DatabaseMerger(deps, dbContext, rocksDao);
+		long start = -System.nanoTime();
 		var g = dm.mergeWithCHA(args[0] + ":" + args[1] + ":" + args[2]);
+		System.out.println((start + System.nanoTime()) * 1E-9 + "s");
 		System.out.println("Stitched graph has " + g.numNodes() + " nodes and " + g.numArcs() + " arcs");
 		for(long[] a: internalArcs) 
 			if (!g.nodes().contains(a[0]) || !g.nodes().contains(a[1]) || ! g.successors(a[0]).contains(a[1]))
