@@ -33,6 +33,7 @@ public class TestInternal {
 
 		final var packageName = args[0] + Constants.mvnCoordinateSeparator + args[1];
 		final var result = dbContext.select(PackageVersions.PACKAGE_VERSIONS.ID).from(PackageVersions.PACKAGE_VERSIONS).join(Packages.PACKAGES).on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID.eq(Packages.PACKAGES.ID)).where(Packages.PACKAGES.PACKAGE_NAME.eq(packageName)).and(PackageVersions.PACKAGE_VERSIONS.VERSION.eq(args[2])).fetchOne();
+		if (result == null) throw new IllegalArgumentException("Revision not in the metadata database");
 		final long graphId = result.component1();
 		System.out.println("Requested revision has id " + graphId);
 		var graph = rocksDao.getGraphData(graphId);
@@ -60,7 +61,7 @@ public class TestInternal {
 
 		Set<Revision> dependencySet = null;
 		GraphMavenResolver graphResolver = new GraphMavenResolver();
-		graphResolver.buildDependencyGraph(dbContext, "dummy");
+		graphResolver.buildDependencyGraph(dbContext, "unused");
 		dependencySet = graphResolver.resolveDependencies(args[0], args[1], args[2], -1, dbContext, true);
 		
 		System.out.println(dependencySet);
