@@ -1,26 +1,31 @@
-package eu.fasten.core.index;
+package eu.fasten.core.legacy;
 
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import eu.fasten.core.data.KnowledgeBase;
-import eu.fasten.core.data.KnowledgeBase.Node;
-import eu.fasten.core.data.RevisionCallGraph;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.rocksdb.RocksDBException;
 
+import eu.fasten.core.data.RevisionCallGraph;
+import eu.fasten.core.legacy.Indexer;
+import eu.fasten.core.legacy.KnowledgeBase;
+import eu.fasten.core.legacy.KnowledgeBase.Node;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+
+@Disabled("No longer in use")
 public class IndexerTest {
 
     final String[] JSON_SPECS = {
@@ -168,7 +173,7 @@ public class IndexerTest {
 
         for (int pass = 0; pass < 2; pass++) {
             for (final var entry : kb.callGraphs.long2ObjectEntrySet()) {
-                final eu.fasten.core.data.KnowledgeBase.CallGraph callGraph = entry.getValue();
+                final eu.fasten.core.legacy.KnowledgeBase.CallGraph callGraph = entry.getValue();
                 for (final long gid : callGraph.callGraphData().nodes())
                     if (!(callGraph.callGraphData().isExternal(gid))) {
                         final Node node = kb.new Node(gid, entry.getLongKey());
