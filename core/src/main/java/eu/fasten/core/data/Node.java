@@ -22,6 +22,7 @@ import java.util.Map;
 
 public abstract class Node {
 
+
     /**
      * FastenURI corresponding to this Node.
      */
@@ -57,6 +58,6 @@ public abstract class Node {
      * @return entity
      */
     public String getEntity() {
-        return this.uri.getEntity();
+        return this.uri.getRawEntity();
     }
 }

@@ -128,32 +128,36 @@ public class MetadataUtils {
             throw new IllegalStateException("Could not find package version id");
         }
 
-        String path = jsonRecord.getJSONObject("payload").getString("filename");
+        String filename = jsonRecord.getJSONObject("payload").getString("filename");
         //Fix issue #21 from quality-analyzer repository
-        int index = StringUtils.ordinalIndexOf(path, "/", 5);
-        String filename = path.substring(index+1);
+        //int index = StringUtils.ordinalIndexOf(path, "/", 5);
+        //String filename = path.substring(index+1);
+        
+        logger.info("Filename from RapidPlugin is " + filename);
 
-        int lineStart = Integer.parseInt(jsonRecord.getJSONObject("payload").getString("start_line"));
-        int lineEnd = Integer.parseInt(jsonRecord.getJSONObject("payload").getString("end_line"));
+        int lineStart = jsonRecord.getJSONObject("payload").getInt("start_line");
+        int lineEnd = jsonRecord.getJSONObject("payload").getInt("end_line");
 
         Long fileId = getFileId(pckVersionId, filename);//could return null
 
         if(fileId == null ) {
             logger.error("Could not fetch fileID for package version id = " + pckVersionId +
-                    " and path = " + path);
+                    " and filename = " + filename);
             throw new IllegalStateException("Could not find package version id");
         }
 
         List<Long> modulesId = getModuleIds(fileId);//could return empty List
 
+        logger.info("Found " + modulesId.size() + " modules");
+
         ArrayList<CallableHolder> callables = new ArrayList<CallableHolder>();
 
-        //String name = jsonRecord.getJSONObject("payload").getString("name");
+        JSONObject metadata = jsonRecord.getJSONObject("payload").getJSONObject("metrics");
 
         if(!modulesId.isEmpty()) {
 
             for(Long moduleId : modulesId) {
-                callables.addAll(getCallablesInformation(moduleId, lineStart, lineEnd));
+                callables.addAll(getCallablesInformation(moduleId, lineStart, lineEnd, metadata));
             }
 
             logger.info("Found " + callables.size() + " methods for which startLine and endline are in [" + lineStart + ", " + lineEnd + "]");
@@ -285,7 +289,7 @@ public class MetadataUtils {
      *
      * @return List of CallableHolder (empty List if no callable could be found)
      */
-    private List<CallableHolder> getCallablesInformation(Long moduleId, int lineStart, int lineEnd)  {
+    private List<CallableHolder> getCallablesInformation(Long moduleId, int lineStart, int lineEnd, JSONObject metadata)  {
 
         List<CallableHolder> calls = new ArrayList<>();
 
@@ -305,6 +309,7 @@ public class MetadataUtils {
 
             // Create callable object
             CallableHolder ch = new CallableHolder(cr);
+            ch.setCallableMetadata(metadata);
             //filter and store callable only if start and end line overlap with input
             calls.add(ch);
         }

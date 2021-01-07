@@ -18,6 +18,9 @@
 
 package eu.fasten.core.data;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import eu.fasten.core.utils.FastenUriUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -34,6 +37,7 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
     static {
         classHierarchyJSONKey = "cha";
     }
+
 
     /**
      * Creates {@link ExtendedRevisionJavaCallGraph} with the given builder.
@@ -65,13 +69,14 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
         super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph);
     }
 
+
     /**
      * Creates {@link ExtendedRevisionCallGraph} for the given JSONObject.
      *
      * @param json JSONObject of a revision call graph.
      */
     public ExtendedRevisionJavaCallGraph(final JSONObject json) throws JSONException {
-        super(json);
+        super(json, ExtendedRevisionJavaCallGraph.class);
     }
 
     /**
@@ -82,6 +87,8 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
     public static ExtendedBuilderJava extendedBuilder() {
         return new ExtendedBuilderJava();
     }
+
+
 
     /**
      * Creates a class hierarchy for the given JSONObject.
@@ -129,6 +136,47 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
             result.putAll(aClass.getValue().getMethods());
         }
         return result;
+    }
+
+    /**
+     * Returns the BiMap of all resolved methods of this object.
+     * Note: external nodes are not considered resolved, since they don't have product and version.
+     * Also ids are local to rcg object.
+     *
+     * @return a BiMap method ids and their corresponding fully qualified {@link FastenURI}
+     */
+    public BiMap<Integer, String> mapOfFullURIStrings(){
+        final BiMap<Integer, String> result = HashBiMap.create();
+        for (final var aClass : this.getClassHierarchy().get(JavaScope.internalTypes).entrySet()) {
+            putMethodsOfType(result, aClass.getValue().getMethods());
+        }
+        for (final var aClass : this.getClassHierarchy().get(JavaScope.resolvedTypes).entrySet()) {
+            putMethodsOfType(result, aClass.getKey(),
+                aClass.getValue().getMethods());
+        }
+        return result;
+    }
+
+    private void putMethodsOfType(final BiMap<Integer, String> result, final FastenURI type,
+                                  final Map<Integer, JavaNode> methods) {
+        for (final var nodeEntry : methods.entrySet()) {
+            final var fullUri = FastenUriUtils.generateFullFastenUri(Constants.mvnForge, type.getProduct(),
+                type.getVersion(), nodeEntry.getValue().getUri().toString());
+            if (!result.inverse().containsKey(fullUri)) {
+                result.put(nodeEntry.getKey(), fullUri);
+            }
+        }
+    }
+
+    private void putMethodsOfType(final BiMap<Integer, String> result, final Map<Integer,
+        JavaNode> methods) {
+        for (final var nodeEntry : methods.entrySet()) {
+            final var fullUri = FastenUriUtils.generateFullFastenUri(Constants.mvnForge, this.product,
+                this.version, nodeEntry.getValue().getUri().toString());
+            if (!result.inverse().containsKey(fullUri)) {
+                result.put(nodeEntry.getKey(), fullUri);
+            }
+        }
     }
 
     public Map<Integer, JavaType> externalNodeIdToTypeMap() {
@@ -214,6 +262,65 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
         return artifactId + "_" + groupId + "_" + this.version;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtendedRevisionCallGraph<?> that = (ExtendedRevisionCallGraph<?>) o;
+
+        if (nodeCount != that.nodeCount) {
+            return false;
+        }
+        if (timestamp != that.timestamp) {
+            return false;
+        }
+        if (classHierarchy != null ? !classHierarchy.equals(that.classHierarchy) :
+            that.classHierarchy != null) {
+            return false;
+        }
+        if (graph != null ? !graph.equals(that.graph) : that.graph != null) {
+            return false;
+        }
+        if (forge != null ? !forge.equals(that.forge) : that.forge != null) {
+            return false;
+        }
+        if (product != null ? !product.equals(that.product) : that.product != null) {
+            return false;
+        }
+        if (version != null ? !version.equals(that.version) : that.version != null) {
+            return false;
+        }
+        if (uri != null ? !uri.equals(that.uri) : that.uri != null) {
+            return false;
+        }
+        if (forgelessUri != null ? !forgelessUri.equals(that.forgelessUri) :
+            that.forgelessUri != null) {
+            return false;
+        }
+        return cgGenerator != null ? cgGenerator.equals(that.cgGenerator) :
+            that.cgGenerator == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = classHierarchy != null ? classHierarchy.hashCode() : 0;
+        result = 31 * result + nodeCount;
+        result = 31 * result + (graph != null ? graph.hashCode() : 0);
+        result = 31 * result + (forge != null ? forge.hashCode() : 0);
+        result = 31 * result + (product != null ? product.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
+        result = 31 * result + (uri != null ? uri.hashCode() : 0);
+        result = 31 * result + (forgelessUri != null ? forgelessUri.hashCode() : 0);
+        result = 31 * result + (cgGenerator != null ? cgGenerator.hashCode() : 0);
+        return result;
+    }
+
     /**
      * Converts an {@link ExtendedRevisionJavaCallGraph} into a {@link DirectedGraph} using as global
      * identifiers the local identifiers.
@@ -232,4 +339,6 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
 
         return builder.build();
     }
+
+
 }
