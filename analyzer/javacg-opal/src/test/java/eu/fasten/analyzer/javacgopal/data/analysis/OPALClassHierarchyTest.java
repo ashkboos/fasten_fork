@@ -18,6 +18,10 @@
 
 package eu.fasten.analyzer.javacgopal.data.analysis;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import eu.fasten.analyzer.javacgopal.data.MavenCoordinate;
 import eu.fasten.analyzer.javacgopal.data.PartialCallGraph;
 import eu.fasten.analyzer.javacgopal.data.exceptions.MissingArtifactException;
@@ -57,8 +61,6 @@ import scala.Option;
 import scala.Tuple2;
 import scala.collection.Iterator;
 import scala.collection.mutable.HashSet;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class OPALClassHierarchyTest {
 
@@ -750,17 +752,14 @@ class OPALClassHierarchyTest {
     @Test
     void duplicateArcsTest() throws MissingArtifactException, OPALException {
 
-//        var coordinate = MavenCoordinate.fromString("ch.qos.logback:logback-classic:1.2.3", "jar");
-        var coordinate = MavenCoordinate.fromString("org.junit.platform:junit-platform-engine:1.7.0-M1", "jar");
+        var coordinate = MavenCoordinate.fromString("ch.qos.logback:logback-classic:1.2.3", "jar");
         var rcg = PartialCallGraph.createExtendedRevisionJavaCallGraph(coordinate,
             "", "CHA", 1574072773, MavenUtilities.MAVEN_CENTRAL_REPO);
 
         var depSet = new ArrayList<ExtendedRevisionJavaCallGraph>();
         depSet.add(rcg);
         var merger = new LocalMerger(depSet);
-        Assertions.assertThrows(java.lang.IllegalArgumentException.class, ()-> {
-            merger.mergeAllDeps();
-        });
-//        Assertions.assertDoesNotThrow(merger::mergeAllDeps, "Duplicate arc 943 -> 943");
+
+        Assertions.assertDoesNotThrow(merger::mergeAllDeps, "Duplicate arc 943 -> 943");
     }
 }
