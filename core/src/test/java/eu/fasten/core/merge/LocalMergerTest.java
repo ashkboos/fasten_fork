@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.checkerframework.checker.units.qual.A;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,6 +59,28 @@ public class LocalMergerTest {
             ".%3Cinit%3E()%2Fjava.lang%2FVoidType");
         assertEquals(cg.edgeSet(), Set.of(LongLongPair.of(source, target1), LongLongPair.of(source,
             target2)));
+    }
+
+    @Test
+    public void mergeAllDepsOrderMattersTest() throws FileNotFoundException{
+        var file = new File(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                .getResource("merge/hamcrest-2.2.json"))
+                .getFile());
+        JSONTokener tokener = new JSONTokener(new FileReader(file));
+        var first = new ExtendedRevisionJavaCallGraph(new JSONObject(tokener));
+
+        file = new File(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                .getResource("merge/hamcrest-core-1.3.json"))
+                .getFile());
+        tokener = new JSONTokener(new FileReader(file));
+        var second = new ExtendedRevisionJavaCallGraph(new JSONObject(tokener));
+
+        var merger12 = new LocalMerger(Arrays.asList(first, second));
+        var cg12 = merger12.mergeAllDeps();
+        var merger21 = new LocalMerger(Arrays.asList(second, first));
+        var cg21 = merger21.mergeAllDeps();
+        assertEquals(cg12.numArcs(),cg21.numArcs());
+        assertEquals(cg12.numNodes(),cg21.numNodes());
     }
 
     @Test
