@@ -24,6 +24,7 @@ import eu.fasten.core.data.ExtendedRevisionCallGraph;
 import eu.fasten.core.data.ExtendedRevisionJavaCallGraph;
 import eu.fasten.core.data.ExtendedRevisionPythonCallGraph;
 import eu.fasten.core.data.Graph;
+import eu.fasten.core.data.graphdb.ExtendedGidGraph;
 import eu.fasten.core.data.graphdb.GidGraph;
 import eu.fasten.core.data.metadatadb.MetadataDao;
 import eu.fasten.core.data.metadatadb.codegen.tables.records.CallablesRecord;
@@ -40,11 +41,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.BatchUpdateException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.DSLContext;
@@ -55,17 +52,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.sql.BatchUpdateException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class MetadataDBExtension implements KafkaPlugin, DBConnector {
 
@@ -189,7 +175,7 @@ public class MetadataDBExtension implements KafkaPlugin, DBConnector {
         if (gidGraph == null) {
             return Optional.empty();
         } else {
-            return Optional.of(gidGraph.toJSONString());
+            return Optional.of(gidGraph.toJSON().toString());
         }
     }
 
@@ -277,9 +263,12 @@ public class MetadataDBExtension implements KafkaPlugin, DBConnector {
         callablesIds.addAll(internalNodesSet);
         callablesIds.addAll(externalNodesSet);
 
+        var gid2uriMap = new HashMap<Long, String>(callablesIds.size());
+        callables.forEach(c -> gid2uriMap.put(lidToGidMap.get(c.getId().longValue()), c.getFastenUri()));
+
         // Create a GID Graph for production
-        this.gidGraph = new GidGraph(packageVersionId, callGraph.product, callGraph.version,
-                callablesIds, numInternal, edges);
+        this.gidGraph = new ExtendedGidGraph(packageVersionId, callGraph.product, callGraph.version,
+                callablesIds, numInternal, edges, gid2uriMap);
         return packageVersionId;
     }
 
