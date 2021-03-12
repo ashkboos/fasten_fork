@@ -63,13 +63,13 @@ public class LocalMergerTest {
     @Test
     public void mergeAllDepsOrderMattersTest() throws FileNotFoundException{
         var file = new File(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("merge/hamcrest-2.2.json"))
+                .getResource("merge/hamcrest_org.hamcrest_2.2.json"))
                 .getFile());
         JSONTokener tokener = new JSONTokener(new FileReader(file));
         var first = new ExtendedRevisionJavaCallGraph(new JSONObject(tokener));
 
         file = new File(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
-                .getResource("merge/hamcrest-core-1.3.json"))
+                .getResource("merge/hamcrest-core_org.hamcrest_1.3.json"))
                 .getFile());
         tokener = new JSONTokener(new FileReader(file));
         var second = new ExtendedRevisionJavaCallGraph(new JSONObject(tokener));
@@ -78,8 +78,8 @@ public class LocalMergerTest {
         var cg12 = merger12.mergeAllDeps();
         var merger21 = new LocalMerger(Arrays.asList(second, first));
         var cg21 = merger21.mergeAllDeps();
-        assertEquals(cg12.numArcs(),cg21.numArcs());
-        assertEquals(cg12.numNodes(),cg21.numNodes());
+        assertEquals(cg12.numArcs(),cg21.numArcs(),"Arc number test.");
+        assertEquals(cg12.numNodes(),cg21.numNodes(),"Node number test.");
     }
 
     @Test
