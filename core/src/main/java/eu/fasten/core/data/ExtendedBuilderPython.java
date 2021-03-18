@@ -64,6 +64,11 @@ public final class ExtendedBuilderPython extends ExtendedBuilder<Map<PythonScope
         return this;
     }
 
+    public ExtendedBuilderPython dependencyList(final DependencyList depList) {
+        this.depList = depList;
+        return this;
+    }
+
     public ExtendedRevisionPythonCallGraph build() {
         return new ExtendedRevisionPythonCallGraph(this);
     }

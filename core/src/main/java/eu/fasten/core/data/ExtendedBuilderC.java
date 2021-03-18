@@ -74,6 +74,11 @@ public final class ExtendedBuilderC extends ExtendedBuilder<Map<CScope, Map<Stri
         return this;
     }
 
+    public ExtendedBuilderC dependencyList(final DependencyList depList) {
+        this.depList = depList;
+        return this;
+    }
+
     public ExtendedRevisionCCallGraph build() {
         return new ExtendedRevisionCCallGraph(this);
     }

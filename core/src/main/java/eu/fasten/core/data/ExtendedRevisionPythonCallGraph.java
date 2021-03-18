@@ -57,8 +57,8 @@ public class ExtendedRevisionPythonCallGraph extends ExtendedRevisionCallGraph<M
     public ExtendedRevisionPythonCallGraph(final String forge, final String product, final String version,
                                      final long timestamp, int nodeCount, final String cgGenerator,
                                      final Map<PythonScope, Map<String, PythonType>>classHierarchy,
-                                     final Graph graph) {
-        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph);
+                                     final Graph graph, final DependencyList depList) {
+        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph, depList);
     }
 
     /**

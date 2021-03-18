@@ -29,6 +29,7 @@ import eu.fasten.core.data.Constants;
 import eu.fasten.core.data.ExtendedRevisionCallGraph;
 import eu.fasten.core.data.ExtendedRevisionJavaCallGraph;
 import eu.fasten.core.data.Graph;
+import eu.fasten.core.data.DependencyList;
 import eu.fasten.core.data.JavaScope;
 import eu.fasten.core.data.JavaType;
 import eu.fasten.core.data.FastenURI;
@@ -55,6 +56,7 @@ import org.opalj.tac.cg.CallGraph;
 import org.opalj.value.ValueInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.json.JSONArray;
 import scala.Function1;
 import scala.collection.JavaConverters;
 
@@ -137,7 +139,7 @@ public class PartialCallGraph {
                     coordinate.getVersionConstraint(), timestamp,
                     partialCallGraph.getNodeCount(), Constants.opalGenerator,
                     partialCallGraph.getClassHierarchy(),
-                    partialCallGraph.getGraph());
+                    partialCallGraph.getGraph(), new DependencyList(new JSONArray()));
         } finally {
             if (file != null) {
                 file.delete();

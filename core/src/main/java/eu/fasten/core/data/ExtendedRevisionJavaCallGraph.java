@@ -63,12 +63,13 @@ public class ExtendedRevisionJavaCallGraph extends ExtendedRevisionCallGraph<Map
      * @param classHierarchy class hierarchy of this revision including all classes of the revision
      *                       <code> Map<{@link FastenURI}, {@link JavaType}> </code>
      * @param graph          the call graph (no control is done on the graph) {@link Graph}
+     * @param depList        the dependency list {@link DependencyList}
      */
     public ExtendedRevisionJavaCallGraph(final String forge, final String product, final String version,
                                          final long timestamp, int nodeCount, final String cgGenerator,
                                          final Map<JavaScope,BiMap<String, JavaType>> classHierarchy,
-                                         final Graph graph) {
-        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph);
+                                         final Graph graph, final DependencyList depList) {
+        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph, depList);
     }
 
 

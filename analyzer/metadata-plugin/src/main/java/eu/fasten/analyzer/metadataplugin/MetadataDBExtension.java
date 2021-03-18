@@ -24,6 +24,7 @@ import eu.fasten.core.data.ExtendedRevisionCallGraph;
 import eu.fasten.core.data.ExtendedRevisionJavaCallGraph;
 import eu.fasten.core.data.ExtendedRevisionPythonCallGraph;
 import eu.fasten.core.data.Graph;
+import eu.fasten.core.data.DependencyList;
 import eu.fasten.core.data.graphdb.ExtendedGidGraph;
 import eu.fasten.core.data.graphdb.GidGraph;
 import eu.fasten.core.data.metadatadb.MetadataDao;
@@ -247,6 +248,9 @@ public class MetadataDBExtension implements KafkaPlugin, DBConnector {
         // Insert all the edges
         var edges = insertEdges(callGraph.getGraph(), lidToGidMap, metadataDao);
 
+        // Insert all dependencies
+        insertDependencies(callGraph.getDepList(), metadataDao, packageVersionId);
+
         // Remove duplicate nodes
         var internalIds = new LongArrayList(numInternal);
         var externalIds = new LongArrayList(callablesIds.size() - numInternal);
@@ -282,6 +286,11 @@ public class MetadataDBExtension implements KafkaPlugin, DBConnector {
     protected List<EdgesRecord> insertEdges(Graph graph,
                                             Long2LongOpenHashMap lidToGidMap, MetadataDao metadataDao) {
         return new ArrayList<EdgesRecord>();
+    }
+
+    // Insert dependencies by overriding this method
+    protected void insertDependencies(DependencyList depList, MetadataDao metadataDao, long packageVersionId) {
+        /* Nothing */
     }
 
     protected Timestamp getProperTimestamp(long timestamp) {

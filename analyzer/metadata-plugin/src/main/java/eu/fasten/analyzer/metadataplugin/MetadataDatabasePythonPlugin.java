@@ -26,6 +26,8 @@ import eu.fasten.core.data.ExtendedRevisionPythonCallGraph;
 import eu.fasten.core.data.ExtendedRevisionCallGraph;
 import eu.fasten.core.data.Graph;
 import eu.fasten.core.data.graphdb.GidGraph;
+import eu.fasten.core.data.DependencyList;
+import eu.fasten.core.data.Dependency;
 import eu.fasten.core.data.metadatadb.MetadataDao;
 import eu.fasten.core.data.metadatadb.codegen.tables.records.CallablesRecord;
 import eu.fasten.core.data.metadatadb.codegen.tables.records.EdgesRecord;
@@ -162,6 +164,14 @@ public class MetadataDatabasePythonPlugin extends Plugin {
                 metadataDao.batchInsertEdges(edgesBatch);
             }
             return edges;
+        }
+
+        protected void insertDependencies(DependencyList depList, MetadataDao metadataDao, long packageVersionId) {
+            for (var dep : depList.getDependencies()) {
+                final var depId = metadataDao.insertPackage(dep.getProduct(), dep.getForge());
+                metadataDao.insertDependency(packageVersionId, depId, dep.getConstraints(),
+                                            null, null, null, new JSONObject());
+            }
         }
     }
 }

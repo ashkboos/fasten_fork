@@ -67,6 +67,11 @@ public final class ExtendedBuilderJava extends ExtendedBuilder<Map<JavaScope, Bi
         return this;
     }
 
+    public ExtendedBuilderJava dependencyList(final DependencyList depList) {
+        this.depList = depList;
+        return this;
+    }
+
     public ExtendedRevisionJavaCallGraph build() {
         return new ExtendedRevisionJavaCallGraph(this);
     }

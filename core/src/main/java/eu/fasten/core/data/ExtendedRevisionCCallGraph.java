@@ -62,12 +62,13 @@ public class ExtendedRevisionCCallGraph extends ExtendedRevisionCallGraph<Map<CS
      * @param classHierarchy class hierarchy of this revision including all classes of the revision
      *                       <code> Map<{@link FastenURI}, {@link Type}> </code>
      * @param graph          the call graph (no control is done on the graph) {@link Graph}
+     * @param depList        the dependency list {@link DependencyList}
      */
     public ExtendedRevisionCCallGraph(final String forge, final String product, final String version,
                                      final long timestamp, int nodeCount, final String cgGenerator,
                                      final Map<CScope, Map<String, Map<Integer, CNode>>>classHierarchy,
-                                     final Graph graph) {
-        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph);
+                                     final Graph graph, final DependencyList depList) {
+        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph, depList);
     }
 
     /**
@@ -83,13 +84,14 @@ public class ExtendedRevisionCCallGraph extends ExtendedRevisionCallGraph<Map<CS
      * @param classHierarchy class hierarchy of this revision including all classes of the revision
      *                       <code> Map<{@link FastenURI}, {@link Type}> </code>
      * @param graph          the call graph (no control is done on the graph) {@link Graph}
+     * @param depList        the dependency list {@link DependencyList}
      * @param architecture   the architecture.
      */
     public ExtendedRevisionCCallGraph(final String forge, final String product, final String version,
                                      final long timestamp, int nodeCount, final String cgGenerator,
                                      final Map<CScope, Map<String, Map<Integer, CNode>>>classHierarchy,
-                                     final Graph graph, final String architecture) {
-        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph);
+                                     final Graph graph, final DependencyList depList, final String architecture) {
+        super(forge, product, version, timestamp, nodeCount, cgGenerator, classHierarchy, graph, depList);
         this.architecture = architecture;
     }
 

@@ -31,6 +31,7 @@ public abstract class ExtendedBuilder<A> {
     protected A classHierarchy;
     protected Graph graph;
     protected int nodeCount;
+    protected DependencyList depList;
 
     public ExtendedBuilder() {
     }
@@ -65,6 +66,10 @@ public abstract class ExtendedBuilder<A> {
 
     public int getNodeCount() {
         return nodeCount;
+    }
+
+    public DependencyList getDepList() {
+        return depList;
     }
 
     public ExtendedBuilder<A> nodeCount(final int nodeCount) {
@@ -104,6 +109,11 @@ public abstract class ExtendedBuilder<A> {
 
     public ExtendedBuilder<A> classHierarchy(final A cha) {
         this.classHierarchy = cha;
+        return this;
+    }
+
+    public ExtendedBuilder<A> dependencyList(final DependencyList depList) {
+        this.depList = depList;
         return this;
     }
 

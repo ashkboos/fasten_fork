@@ -62,8 +62,6 @@ class ExtendedRevisionPythonCallGraphTest {
 
         JSONObject jsonGraph = new JSONObject(tokener);
 
-        System.out.println("HAAHAHAHAHAAAHAHAH " + jsonGraph.toString());
-
         assertEquals(jsonGraph.getJSONObject("modules").getJSONObject("internal").toString(),
                 graph.toJSON().getJSONObject("modules").getJSONObject("internal").toString());
 
@@ -72,6 +70,9 @@ class ExtendedRevisionPythonCallGraphTest {
 
         assertEquals(jsonGraph.getJSONObject("graph").toMap(),
                 graph.toJSON().getJSONObject("graph").toMap());
+
+        assertEquals(jsonGraph.getJSONArray("depset").toString(),
+                graph.toJSON().getJSONArray("depset").toString());
     }
 
     @Test

@@ -20,6 +20,7 @@ package eu.fasten.core.data;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,11 @@ public abstract class ExtendedRevisionCallGraph<A> {
     protected String cgGenerator;
 
     /**
+     * The dependency list of the revision call graph.
+     */
+    protected DependencyList depList;
+
+    /**
      * Dummy Constructor, we need it to create objects by using an ExtendedBuilder.
      */
     protected ExtendedRevisionCallGraph() {}
@@ -111,6 +117,7 @@ public abstract class ExtendedRevisionCallGraph<A> {
         this.classHierarchy = builder.getClassHierarchy();
         this.graph = builder.getGraph();
         this.nodeCount = builder.getNodeCount();
+        this.depList = builder.getDepList();
     }
 
     /**
@@ -128,8 +135,8 @@ public abstract class ExtendedRevisionCallGraph<A> {
      */
     protected ExtendedRevisionCallGraph(final String forge, final String product, final String version,
                                      final long timestamp, int nodeCount, final String cgGenerator,
-                                     final A classHierarchy,
-                                     final Graph graph) {
+                                     final A classHierarchy, final Graph graph,
+                                     final DependencyList depList) {
         this.forge = forge;
         this.product = product;
         this.version = version;
@@ -140,6 +147,7 @@ public abstract class ExtendedRevisionCallGraph<A> {
         this.classHierarchy = classHierarchy;
         this.nodeCount = nodeCount;
         this.graph = graph;
+        this.depList = depList;
     }
 
     /**
@@ -165,6 +173,12 @@ public abstract class ExtendedRevisionCallGraph<A> {
         this.graph = new Graph(json.getJSONObject("graph"));
         this.classHierarchy = getCHAFromJSON(json.getJSONObject(classHierarchyJSONKey));
         this.nodeCount = json.getInt("nodes");
+
+        try {
+            this.depList = new DependencyList(json.getJSONArray("depset"));
+        } catch(final JSONException exception) {
+            this.depList = new DependencyList(new JSONArray());
+        }
     }
 
     public String getCgGenerator() {
@@ -181,6 +195,10 @@ public abstract class ExtendedRevisionCallGraph<A> {
 
     public int getNodeCount() {
         return nodeCount;
+    }
+
+    public DependencyList getDepList() {
+        return depList;
     }
 
     /**
@@ -245,6 +263,9 @@ public abstract class ExtendedRevisionCallGraph<A> {
         result.put(this.classHierarchyJSONKey, classHierarchyToJSON(classHierarchy));
         result.put("graph", graph.toJSON());
         result.put("nodes", nodeCount);
+        if (this.classHierarchyJSONKey != "cha") {
+            result.put("depset", depList.toJSON());
+        }
 
         return result;
     }
