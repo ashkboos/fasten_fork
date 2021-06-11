@@ -86,7 +86,8 @@ public class GraphDataTransformer implements Runnable {
 //        var packageVersionIds = new HashSet<Long>();
         var packageVersionIds = metadataDb.select(PackageVersions.PACKAGE_VERSIONS.ID).from(PackageVersions.PACKAGE_VERSIONS).fetch().intoSet(PackageVersions.PACKAGE_VERSIONS.ID);
 //        var packageVersions = new HashMap<Long, Pair<String, String>>();
-        var packageVersions = metadataDb.select(Packages.PACKAGES.PACKAGE_NAME, PackageVersions.PACKAGE_VERSIONS.VERSION)
+        var packageVersions = metadataDb.select(PackageVersions.PACKAGE_VERSIONS.ID,
+            Packages.PACKAGES.PACKAGE_NAME, PackageVersions.PACKAGE_VERSIONS.VERSION)
                 .from(Packages.PACKAGES).join(PackageVersions.PACKAGE_VERSIONS)
                 .on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID.eq(Packages.PACKAGES.ID))
                 .where(PackageVersions.PACKAGE_VERSIONS.ID.in(packageVersionIds)).fetchMap(PackageVersions.PACKAGE_VERSIONS.ID);
@@ -110,8 +111,8 @@ public class GraphDataTransformer implements Runnable {
             var gidToUriMap = new HashMap<Long, String>();
             callables.forEach(c -> gidToUriMap.put(c.value1(), c.value3()));
             var extendedGidGraph = new ExtendedGidGraph(packageVersionId,
-                    packageVersions.get(packageVersionId).value1(),
                     packageVersions.get(packageVersionId).value2(),
+                    packageVersions.get(packageVersionId).value3(),
                     new ArrayList<>(oldGraphData.nodes()),
                     oldGraphData.nodes().size() - oldGraphData.externalNodes().size(),
                     new ArrayList<>(edges),
