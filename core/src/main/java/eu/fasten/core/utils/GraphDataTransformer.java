@@ -83,14 +83,14 @@ public class GraphDataTransformer implements Runnable {
             logger.error("Could not setup connections to the database:", e);
             return;
         }
-        var packageVersionIds = new HashSet<Long>();
-        metadataDb.select(PackageVersions.PACKAGE_VERSIONS.ID).from(PackageVersions.PACKAGE_VERSIONS).fetch().forEach(r -> packageVersionIds.add(r.value1()));
-        var packageVersions = new HashMap<Long, Pair<String, String>>();
-        metadataDb.select(PackageVersions.PACKAGE_VERSIONS.ID, Packages.PACKAGES.PACKAGE_NAME, PackageVersions.PACKAGE_VERSIONS.VERSION)
+//        var packageVersionIds = new HashSet<Long>();
+        var packageVersionIds = metadataDb.select(PackageVersions.PACKAGE_VERSIONS.ID).from(PackageVersions.PACKAGE_VERSIONS).fetch().intoSet(PackageVersions.PACKAGE_VERSIONS.ID);
+//        var packageVersions = new HashMap<Long, Pair<String, String>>();
+        var packageVersions = metadataDb.select(Packages.PACKAGES.PACKAGE_NAME, PackageVersions.PACKAGE_VERSIONS.VERSION)
                 .from(Packages.PACKAGES).join(PackageVersions.PACKAGE_VERSIONS)
                 .on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID.eq(Packages.PACKAGES.ID))
-                .where(PackageVersions.PACKAGE_VERSIONS.ID.in(packageVersionIds)).fetch()
-                .forEach(r -> packageVersions.put(r.value1(), new Pair<>(r.value2(), r.value3())));
+                .where(PackageVersions.PACKAGE_VERSIONS.ID.in(packageVersionIds)).fetchMap(PackageVersions.PACKAGE_VERSIONS.ID);
+//                .forEach(r -> packageVersions.put(r.value1(), new Pair<>(r.value2(), r.value3())));
         for (var packageVersionId : packageVersionIds) {
             DirectedGraph oldGraphData;
             try {
@@ -110,8 +110,8 @@ public class GraphDataTransformer implements Runnable {
             var gidToUriMap = new HashMap<Long, String>();
             callables.forEach(c -> gidToUriMap.put(c.value1(), c.value3()));
             var extendedGidGraph = new ExtendedGidGraph(packageVersionId,
-                    packageVersions.get(packageVersionId).getFirst(),
-                    packageVersions.get(packageVersionId).getSecond(),
+                    packageVersions.get(packageVersionId).value1(),
+                    packageVersions.get(packageVersionId).value2(),
                     new ArrayList<>(oldGraphData.nodes()),
                     oldGraphData.nodes().size() - oldGraphData.externalNodes().size(),
                     new ArrayList<>(edges),
