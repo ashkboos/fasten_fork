@@ -277,7 +277,7 @@ public class MetadataDBExtension implements KafkaPlugin, DBConnector {
 
         // Create a GID Graph for production
         this.gidGraph = new ExtendedGidGraph(packageVersionId, callGraph.product, callGraph.version,
-                callablesIds, numInternal, edges, gid2uriMap);
+                callablesIds, numInternal, edges, gid2uriMap, new HashMap<>());
         return packageVersionId;
     }
 
