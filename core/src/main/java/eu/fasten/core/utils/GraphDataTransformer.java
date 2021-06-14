@@ -26,7 +26,7 @@ import eu.fasten.core.data.metadatadb.codegen.tables.Edges;
 import eu.fasten.core.data.metadatadb.codegen.tables.PackageVersions;
 import eu.fasten.core.data.metadatadb.codegen.tables.Packages;
 import eu.fasten.core.dbconnectors.PostgresConnector;
-import org.apache.commons.math3.util.Pair;
+import it.unimi.dsi.fastutil.longs.LongLongPair;
 import org.jooq.DSLContext;
 import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;
@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "GraphDataTransformer")
 public class GraphDataTransformer implements Runnable {
@@ -106,8 +107,13 @@ public class GraphDataTransformer implements Runnable {
             }
             var callables = new HashSet<>(metadataDb.select(Callables.CALLABLES.ID, Callables.CALLABLES.MODULE_ID, Callables.CALLABLES.FASTEN_URI)
                     .from(Callables.CALLABLES).where(Callables.CALLABLES.ID.in(oldGraphData.nodes())).fetch());
-            var edges = new HashSet<>(metadataDb.selectFrom(Edges.EDGES).where(Edges.EDGES.SOURCE_ID.in(oldGraphData.nodes())).fetch());
-            edges.addAll(metadataDb.selectFrom(Edges.EDGES).where(Edges.EDGES.TARGET_ID.in(oldGraphData.nodes())).fetch());
+            var sourceIDs = oldGraphData.edgeSet().stream().map(LongLongPair::firstLong).collect(Collectors.toSet());
+            var targetIDs = oldGraphData.edgeSet().stream().map(LongLongPair::secondLong).collect(Collectors.toSet());
+            var edges = new HashSet<>(metadataDb.selectFrom(Edges.EDGES)
+                    .where(Edges.EDGES.SOURCE_ID.in(sourceIDs)
+                    .and(Edges.EDGES.TARGET_ID.in(targetIDs)))
+                    .fetch());
+
             var gidToUriMap = new HashMap<Long, String>();
             callables.forEach(c -> gidToUriMap.put(c.value1(), c.value3()));
             var extendedGidGraph = new ExtendedGidGraph(packageVersionId,
