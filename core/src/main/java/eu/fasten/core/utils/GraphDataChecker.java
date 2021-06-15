@@ -32,7 +32,7 @@ import java.sql.SQLException;
 @CommandLine.Command(name = "GraphDataChecker")
 public class GraphDataChecker implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(GraphDataTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(GraphDataChecker.class);
 
     @CommandLine.Option(names = {"-gd", "--graph-db"},
             paramLabel = "Dir",
@@ -52,7 +52,7 @@ public class GraphDataChecker implements Runnable {
     String dbUser;
 
     public static void main(String[] args) {
-        final int exitCode = new CommandLine(new GraphDataTransformer()).execute(args);
+        final int exitCode = new CommandLine(new GraphDataChecker()).execute(args);
         System.exit(exitCode);
     }
 
