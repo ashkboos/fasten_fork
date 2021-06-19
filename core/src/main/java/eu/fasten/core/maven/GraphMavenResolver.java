@@ -120,7 +120,7 @@ public class GraphMavenResolver implements Runnable {
             final var optDependencyGraph = DependencyGraphUtilities.loadDependencyGraph(serializedPath);
             if (optDependencyGraph.isPresent()) {
                 dependencyGraph = optDependencyGraph.get();
-                dependentGraph = DependencyGraphUtilities.invertDependencyGraph(dependencyGraph);
+				// dependentGraph = DependencyGraphUtilities.invertDependencyGraph(dependencyGraph);
             }
         } catch (final Exception e) {
             logger.warn("Could not load serialized dependency graph from {}\n", serializedPath, e);

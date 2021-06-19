@@ -201,6 +201,8 @@ public class SeedTest {
 		final Graph<Revision, DependencyEdge> graph = GraphMavenResolver.dependencyGraph;
 		final Set<Revision> seeds = new HashSet<>();
 
+		LOGGER.info("Gatheric revisions of specified products");
+
 		// Gather all revision with specified product
 		for (final Revision r : graph.vertexSet())
 			if (seedProducts.contains(r.artifactId)) seeds.add(r);
