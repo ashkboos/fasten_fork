@@ -83,7 +83,7 @@ public class SeedTest {
 	 *            {@link TrivialScorer} will be used instead.
 	 */
 	public SeedTest(final String jdbcURI, final String database, final String rocksDb, final String resolverGraph, final String scorer) throws Exception {
-		this(PostgresConnector.getDSLContext(jdbcURI, database, false), new RocksDao(rocksDb, true), resolverGraph, scorer == null ? TrivialScorer.getInstance() : ObjectParser.fromSpec(scorer, Scorer.class));
+		this(PostgresConnector.getDSLContext(jdbcURI, database, false), null, resolverGraph, scorer == null ? TrivialScorer.getInstance() : ObjectParser.fromSpec(scorer, Scorer.class));
 	}
 
 	/**
