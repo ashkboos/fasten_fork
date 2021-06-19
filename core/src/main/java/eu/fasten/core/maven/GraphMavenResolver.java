@@ -535,7 +535,7 @@ public class GraphMavenResolver implements Runnable {
         } else {
             dependencyGraph = graphOpt.get();
         }
-        dependentGraph = DependencyGraphUtilities.invertDependencyGraph(dependencyGraph);
+//        dependentGraph = DependencyGraphUtilities.invertDependencyGraph(dependencyGraph);
     }
 
     private long getCreatedAt(final String groupId, final String artifactId, final String version, final DSLContext context) {

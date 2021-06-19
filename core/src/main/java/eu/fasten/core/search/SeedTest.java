@@ -201,11 +201,11 @@ public class SeedTest {
 		final Graph<Revision, DependencyEdge> graph = GraphMavenResolver.dependencyGraph;
 		final Set<Revision> seeds = new HashSet<>();
 
-		LOGGER.info("Gatheric revisions of specified products");
+		LOGGER.info("Gatheric revisions of specified products " + seedProducts);
 
 		// Gather all revision with specified product
 		for (final Revision r : graph.vertexSet())
-			if (seedProducts.contains(r.artifactId)) seeds.add(r);
+			if (seedProducts.contains(r.groupId + ":" + r.artifactId)) seeds.add(r);
 
 		LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
 
