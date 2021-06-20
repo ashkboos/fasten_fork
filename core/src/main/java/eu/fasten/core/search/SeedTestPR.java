@@ -18,12 +18,9 @@
 
 package eu.fasten.core.search;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -145,34 +142,33 @@ public class SeedTestPR {
 		for(int i = 0; products.size() < n; i++) {
 			products.add(revs[i].groupId + ":" + revs[i].artifactId);
 
-		final String[] allSeedProducts = products.toArray(new String[n]);
+			final String[] allSeedProducts = products.toArray(new String[n]);
 
-		LOGGER.info("Seed products: " + Arrays.toString(allSeedProducts));
+			LOGGER.info("Seed products: " + Arrays.toString(allSeedProducts));
 
-		for (int r = 1; r <= radius; r++) {
-			for (int p = 1; p < n; p++) {
-				final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
-				final Set<Revision> seeds = new HashSet<>();
+			for (int r = 1; r <= radius; r++) {
+				for (int p = 1; p < n; p++) {
+					final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
+					final Set<Revision> seeds = new HashSet<>();
 
-				LOGGER.info("Gatheric revisions of specified products " + seedProducts);
+					LOGGER.info("Gatheric revisions of specified products " + seedProducts);
 
-				// Gather all revision with specified product
-				for (final Revision rev : graph.vertexSet())
-					if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
+					// Gather all revision with specified product
+					for (final Revision rev : graph.vertexSet()) if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
 
-				LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
+					LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
 
-				final Set<Revision> backward = new HashSet<>();
+					final Set<Revision> backward = new HashSet<>();
 
-				for (final Revision seed : seeds)
-					new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, r).forEachRemaining(x -> backward.add(x));
+					for (final Revision seed : seeds) new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, r).forEachRemaining(x -> backward.add(x));
 
-				LOGGER.info("Backward visit (radius: " + radius + ") expanded " + seeds.size() + " revisions to " + backward.size());
+					LOGGER.info("Backward visit (radius: " + radius + ") expanded " + seeds.size() + " revisions to " + backward.size());
 
-				final int[] c = { 0 };
-				new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
+					final int[] c = { 0 };
+					new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
 
-				System.out.println(r + "\t" + p + "\t" + c[0]);
+					System.out.println(r + "\t" + p + "\t" + c[0]);
+				}
 			}
 		}
 	}
