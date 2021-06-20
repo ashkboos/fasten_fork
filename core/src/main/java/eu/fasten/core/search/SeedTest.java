@@ -105,7 +105,6 @@ public class SeedTest {
 		resolver.setIgnoreMissing(true);
 	}
 
-
 	/**
 	 * Performs a breadth-first visit of the given graph, starting from the provided seed, using the
 	 * provided predicate and returning a collection of {@link Result} instances scored using the
@@ -157,7 +156,6 @@ public class SeedTest {
 		}
 	}
 
-
 	@SuppressWarnings("boxing")
 	public static void main(final String args[]) throws Exception {
 		final SimpleJSAP jsap = new SimpleJSAP(SeedTest.class.getName(), "Creates an instance of SearchEngine and answers queries from the command line (rlwrap recommended).", new Parameter[] {
@@ -177,7 +175,7 @@ public class SeedTest {
 		final String rocksDb = jsapResult.getString("rocksDB");
 		final String resolverGraph = jsapResult.getString("resolverGraph");
 		final int radius = jsapResult.getInt("radius");
-		final Set<String> seedProducts = new ObjectOpenHashSet<>(jsapResult.getStringArray("seedProducts"));
+		final String[] allSeedProducts = jsapResult.getStringArray("seedProducts");
 		/* WARNING
 		 *
 		 * As of JDK 11.0.10, replacing the constant string below with the parameter "rocksDb" causes
@@ -194,31 +192,37 @@ public class SeedTest {
 
 		//final SearchEngine searchEngine = new SearchEngine(jdbcURI, database, "/mnt/fasten/graphdb.old", resolverGraph, null);
 		final SeedTest searchEngine = new SeedTest(jdbcURI, database, rocksDb, resolverGraph, null);
-		if (new java.util.Random().nextLong() == 0) System.out.println(rocksDb);
+
 		final DSLContext context = searchEngine.context;
 		context.settings().withParseUnknownFunctions(ParseUnknownFunctions.IGNORE);
 
 		final Graph<Revision, DependencyEdge> graph = GraphMavenResolver.dependencyGraph;
-		final Set<Revision> seeds = new HashSet<>();
 
-		LOGGER.info("Gatheric revisions of specified products " + seedProducts);
+		for (int r = 1; r <= radius; r++) {
+			for (int p = 1; p < allSeedProducts.length; p++) {
+				final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
+				final Set<Revision> seeds = new HashSet<>();
 
-		// Gather all revision with specified product
-		for (final Revision r : graph.vertexSet())
-			if (seedProducts.contains(r.groupId + ":" + r.artifactId)) seeds.add(r);
+				LOGGER.info("Gatheric revisions of specified products " + seedProducts);
 
-		LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
+				// Gather all revision with specified product
+				for (final Revision rev : graph.vertexSet())
+					if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
 
-		final Set<Revision> backward = new HashSet<>();
+				LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
 
-		for (final Revision seed : seeds)
-			new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, radius).forEachRemaining(x -> backward.add(x));
+				final Set<Revision> backward = new HashSet<>();
 
-		LOGGER.info("Backward visit (radius: " + radius + ") expanded " + seeds.size() + " revisions to " + backward.size());
+				for (final Revision seed : seeds)
+					new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, r).forEachRemaining(x -> backward.add(x));
 
-		final int[] c = { 0 };
-		new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
+				LOGGER.info("Backward visit (radius: " + radius + ") expanded " + seeds.size() + " revisions to " + backward.size());
 
-		System.out.println(c[0]);
+				final int[] c = { 0 };
+				new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
+
+				System.out.println(r + "\t" + p + "\t" + c[0]);
+			}
+		}
 	}
 }
