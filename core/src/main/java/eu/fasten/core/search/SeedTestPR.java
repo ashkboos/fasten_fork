@@ -39,6 +39,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Parameter;
 import com.martiansoftware.jsap.SimpleJSAP;
+import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 
 import eu.fasten.core.data.graphdb.RocksDao;
@@ -46,6 +47,7 @@ import eu.fasten.core.dbconnectors.PostgresConnector;
 import eu.fasten.core.maven.GraphMavenResolver;
 import eu.fasten.core.maven.data.DependencyEdge;
 import eu.fasten.core.maven.data.Revision;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.lang.ObjectParser;
 
@@ -107,6 +109,7 @@ public class SeedTestPR {
 				new UnflaggedOption("database", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The database name."),
 				new UnflaggedOption("rocksDb", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The path to the RocksDB database of revision call graphs."),
 				new UnflaggedOption("resolverGraph", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The path to a resolver graph (will be created if it does not exist)."),
+				new Switch("revisions", 'r', "revisions", "Use directly top revisions."),
 				new UnflaggedOption("radius", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Backward ball radius."),
 				new UnflaggedOption("n", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Number of seed products."), });
 
@@ -120,6 +123,7 @@ public class SeedTestPR {
 		final String resolverGraph = jsapResult.getString("resolverGraph");
 		final int radius = jsapResult.getInt("radius");
 		final int n = jsapResult.getInt("n");
+		final boolean revisions = jsapResult.getBoolean("revisions");
 
 		final SeedTestPR searchEngine = new SeedTestPR(jdbcURI, database, rocksDb, resolverGraph, null);
 
@@ -146,15 +150,19 @@ public class SeedTestPR {
 
 		for (int r = 1; r <= radius; r++) {
 			for (int p = 1; p <= n; p++) {
-				final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
 				final Set<Revision> seeds = new HashSet<>();
 
-				LOGGER.info("Gatheric revisions of specified products " + seedProducts);
-
-				// Gather all revision with specified product
-				for (final Revision rev : graph.vertexSet()) if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
-
-				LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
+				if (revisions) {
+					for(int i = 0; i < p; i++) seeds.add(revs[i]);
+					LOGGER.info("Using top " + n + " revisions " + seeds);
+				}
+				else {
+					final Set<String> seedProducts = new ObjectLinkedOpenHashSet<>(allSeedProducts, 0, p);
+					LOGGER.info("Gatheric revisions of specified products " + seedProducts);
+					// Gather all revision with specified product
+					for (final Revision rev : graph.vertexSet()) if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
+					LOGGER.info("Found " + seeds.size() + " revisions for " + p + " products");
+				}
 
 				final Set<Revision> backward = new HashSet<>();
 
