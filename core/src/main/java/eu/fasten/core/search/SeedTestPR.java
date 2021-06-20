@@ -107,8 +107,8 @@ public class SeedTestPR {
 				new UnflaggedOption("database", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The database name."),
 				new UnflaggedOption("rocksDb", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The path to the RocksDB database of revision call graphs."),
 				new UnflaggedOption("resolverGraph", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "The path to a resolver graph (will be created if it does not exist)."),
-				new UnflaggedOption("n", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Number of seed products."),
-				new UnflaggedOption("radius", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Backward ball radius."), });
+				new UnflaggedOption("radius", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Backward ball radius."),
+				new UnflaggedOption("n", JSAP.INTEGER_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, JSAP.NOT_GREEDY, "Number of seed products."), });
 
 		final JSAPResult jsapResult = jsap.parse(args);
 		if (jsap.messagePrinted()) System.exit(1);
@@ -139,36 +139,33 @@ public class SeedTestPR {
 		Arrays.sort(revs, (x, y) -> Doubles.compare(scores.get(y).doubleValue(), scores.get(x).doubleValue()));
 
 		final LinkedHashSet<String> products = new LinkedHashSet<>();
-		for(int i = 0; products.size() < n; i++) {
-			products.add(revs[i].groupId + ":" + revs[i].artifactId);
+		for(int i = 0; products.size() < n; i++) products.add(revs[i].groupId + ":" + revs[i].artifactId);
+		final String[] allSeedProducts = products.toArray(new String[n]);
 
-			final String[] allSeedProducts = products.toArray(new String[n]);
+		LOGGER.info("Seed products: " + Arrays.toString(allSeedProducts));
 
-			LOGGER.info("Seed products: " + Arrays.toString(allSeedProducts));
+		for (int r = 1; r <= radius; r++) {
+			for (int p = 1; p <= n; p++) {
+				final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
+				final Set<Revision> seeds = new HashSet<>();
 
-			for (int r = 1; r <= radius; r++) {
-				for (int p = 1; p < n; p++) {
-					final Set<String> seedProducts = new ObjectOpenHashSet<>(allSeedProducts, 0, p);
-					final Set<Revision> seeds = new HashSet<>();
+				LOGGER.info("Gatheric revisions of specified products " + seedProducts);
 
-					LOGGER.info("Gatheric revisions of specified products " + seedProducts);
+				// Gather all revision with specified product
+				for (final Revision rev : graph.vertexSet()) if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
 
-					// Gather all revision with specified product
-					for (final Revision rev : graph.vertexSet()) if (seedProducts.contains(rev.groupId + ":" + rev.artifactId)) seeds.add(rev);
+				LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
 
-					LOGGER.info("Found " + seeds.size() + " revisions for " + seedProducts.size() + " products");
+				final Set<Revision> backward = new HashSet<>();
 
-					final Set<Revision> backward = new HashSet<>();
+				for (final Revision seed : seeds) new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, r).forEachRemaining(x -> backward.add(x));
 
-					for (final Revision seed : seeds) new ClosestFirstIterator<>(new EdgeReversedGraph<>(graph), seed, r).forEachRemaining(x -> backward.add(x));
+				LOGGER.info("Backward visit (radius: " + r + ") expanded " + seeds.size() + " revisions to " + backward.size());
 
-					LOGGER.info("Backward visit (radius: " + radius + ") expanded " + seeds.size() + " revisions to " + backward.size());
+				final int[] c = { 0 };
+				new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
 
-					final int[] c = { 0 };
-					new DepthFirstIterator<>(graph, backward).forEachRemaining((unused) -> c[0]++);
-
-					System.out.println(r + "\t" + p + "\t" + c[0]);
-				}
+				System.out.println(r + "\t" + p + "\t" + c[0]);
 			}
 		}
 	}
