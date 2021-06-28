@@ -27,6 +27,7 @@
         <module>vulnerability-consumer</module>
         <module>repo-analyzer</module>
         <module>license-detector</module>
+        <module>license-feeder</module>
     </modules>
 
     <build>
