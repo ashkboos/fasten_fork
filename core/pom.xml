@@ -244,13 +244,20 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.14.3</version>
+            <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
         <dependency> <!-- For environment variables -->
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-lambda</artifactId>
             <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JSON comparator -->
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
