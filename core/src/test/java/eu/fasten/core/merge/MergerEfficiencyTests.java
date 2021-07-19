@@ -60,7 +60,7 @@ public class MergerEfficiencyTests {
                     return rcg;
                 }).collect(Collectors.toList());
     }
-
+    @Disabled
     @Test
     public void localMergerEfficiencyTest() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -83,7 +83,7 @@ public class MergerEfficiencyTests {
         Assertions.assertEquals(50513, numNodes);
         Assertions.assertEquals(764288, numEdges);
     }
-
+    @Disabled
     @Test
     public void localMergerRepeatedEfficiencyTests() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
