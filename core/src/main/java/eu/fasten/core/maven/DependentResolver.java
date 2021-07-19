@@ -65,7 +65,7 @@ public class DependentResolver implements Runnable{
     protected boolean findRepos;
 
     public static void main(String[] args) {
-        final int exitCode = new CommandLine(new GraphMavenResolver()).execute(args);
+        final int exitCode = new CommandLine(new DependentResolver()).execute(args);
         System.exit(exitCode);
     }
 
