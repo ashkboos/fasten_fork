@@ -4,6 +4,7 @@ import eu.fasten.core.data.metadatadb.codegen.tables.PackageVersions;
 import eu.fasten.core.data.metadatadb.codegen.tables.Packages;
 import eu.fasten.core.dbconnectors.PostgresConnector;
 import eu.fasten.core.maven.data.Revision;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -151,8 +152,14 @@ public class DependentResolver implements Runnable{
             Map<String, Set<String>> result = new HashMap<>();
             while ((line = br.readLine()) != null) {
                 var coord = line.split(":");
-                final var dependents = resolver.resolveDependents(coord[0], coord[1], coord[2],-1,
-                    transitive);
+                ObjectLinkedOpenHashSet<Revision> dependents = ObjectLinkedOpenHashSet.of();
+                try {
+                    dependents =
+                        resolver.resolveDependents(coord[0], coord[1], coord[2], -1,
+                            transitive);
+                }catch (RuntimeException e){
+                    logger.error("Exception occurred while resolving dependents of coord {}", line);
+                }
                 result.put(line,
                     dependents.stream().map(Revision::toString).collect(Collectors.toSet()));
             }
