@@ -64,6 +64,11 @@ public class DependentResolver implements Runnable{
         description = "whether or not find repositories of input file coordinates")
     protected boolean findRepos;
 
+    public static void main(String[] args) {
+        final int exitCode = new CommandLine(new GraphMavenResolver()).execute(args);
+        System.exit(exitCode);
+    }
+
     @Override
     public void run() {
         DSLContext dbContext = null;
