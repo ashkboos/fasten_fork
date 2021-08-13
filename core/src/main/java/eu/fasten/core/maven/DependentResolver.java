@@ -95,19 +95,23 @@ public class DependentResolver implements Runnable{
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                var coord = line.split(":");
-                var deps =
-                    dbContext.select(Packages.PACKAGES.PACKAGE_NAME,
-                        PackageVersions.PACKAGE_VERSIONS.VERSION)
-                        .from(PackageVersions.PACKAGE_VERSIONS)
-                        .join(Packages.PACKAGES)
-                        .on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID.eq(Packages.PACKAGES.ID))
-                        .where(Packages.PACKAGES.PACKAGE_NAME.eq(coord[0] + ":" + coord[1]))
-                        .and(PackageVersions.PACKAGE_VERSIONS.VERSION.eq(coord[2]))
-                        .fetch();
-                result.put(coord[0] + ":" + coord[1] + ":" + coord[2],
-                    deps.intoSet(stringStringRecord2 -> stringStringRecord2.component1() + ":" +
-                        stringStringRecord2.component2()));
+                final var lineArray = line.split(",");
+                final var dependents = lineArray[1];
+                for (String dependent : dependents.split(";")) {
+                    var coord = dependent.split(":");
+                    var deps =
+                        dbContext.select(Packages.PACKAGES.PACKAGE_NAME,
+                            PackageVersions.PACKAGE_VERSIONS.VERSION)
+                            .from(PackageVersions.PACKAGE_VERSIONS)
+                            .join(Packages.PACKAGES)
+                            .on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID.eq(Packages.PACKAGES.ID))
+                            .where(Packages.PACKAGES.PACKAGE_NAME.eq(coord[0] + ":" + coord[1]))
+                            .and(PackageVersions.PACKAGE_VERSIONS.VERSION.eq(coord[2]))
+                            .fetch();
+                    result.put(coord[0] + ":" + coord[1] + ":" + coord[2],
+                        deps.intoSet(stringStringRecord2 -> stringStringRecord2.component1() + ":" +
+                            stringStringRecord2.component2()));
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
