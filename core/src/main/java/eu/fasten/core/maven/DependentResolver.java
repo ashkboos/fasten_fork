@@ -165,7 +165,8 @@ public class DependentResolver implements Runnable{
                     logger.error("Exception occurred while resolving dependents of coord {}", line);
                 }
                 result.put(line,
-                    dependents.stream().map(Revision::toString).collect(Collectors.toSet()));
+                    dependents.stream().map(m->m.groupId+":"+m.artifactId+":"+m.version
+                ).collect(Collectors.toSet()));
             }
             writeToFile(outputPath, result);
 
