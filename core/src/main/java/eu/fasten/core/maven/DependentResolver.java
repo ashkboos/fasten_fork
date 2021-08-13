@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -101,8 +102,7 @@ public class DependentResolver implements Runnable{
                 for (String dependent : dependents.split(";")) {
                     var coord = dependent.split(":");
                     var deps =
-                        dbContext.select(Packages.PACKAGES.PACKAGE_NAME,
-                            PackageVersions.PACKAGE_VERSIONS.VERSION)
+                        dbContext.select(Packages.PACKAGES.REPOSITORY)
                             .from(PackageVersions.PACKAGE_VERSIONS)
                             .join(Packages.PACKAGES)
                             .on(PackageVersions.PACKAGE_VERSIONS.PACKAGE_ID
@@ -111,8 +111,7 @@ public class DependentResolver implements Runnable{
                             .and(PackageVersions.PACKAGE_VERSIONS.VERSION.eq(coord[2]))
                             .fetch();
                     result.put(coord[0] + ":" + coord[1] + ":" + coord[2],
-                        deps.intoSet(stringStringRecord2 -> stringStringRecord2.component1() + ":" +
-                            stringStringRecord2.component2()));
+                        deps.intoSet(Record1::component1));
                 }
             }
             }
