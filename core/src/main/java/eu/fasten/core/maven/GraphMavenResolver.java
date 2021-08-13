@@ -335,6 +335,7 @@ public class GraphMavenResolver implements Runnable {
      */
     public ObjectLinkedOpenHashSet<Revision> resolveDependents(String groupId, String artifactId, String version, long timestamp,
                                                                boolean transitive) {
+
         return dependentBFS(groupId, artifactId, version, timestamp, transitive);
     }
 

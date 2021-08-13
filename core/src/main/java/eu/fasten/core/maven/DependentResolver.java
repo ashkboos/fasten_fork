@@ -114,6 +114,9 @@ public class DependentResolver implements Runnable{
         }
         writeToFile(outPath, result);
     }
+    public static String toString(final Set<String> coords) {
+        return String.join(";", coords);
+    }
 
     private void writeToFile(String outPath, Map<String, Set<String>> result) {
         File output = new File(outPath);
@@ -123,7 +126,7 @@ public class DependentResolver implements Runnable{
             bf = new BufferedWriter(new FileWriter(output));
 
             for (final var entry : result.entrySet()) {
-                bf.write(entry.getKey() + ";" + entry.getValue().toString());
+                bf.write(entry.getKey() + "," + toString(entry.getValue()));
                 bf.newLine();
             }
             bf.flush();
@@ -154,6 +157,7 @@ public class DependentResolver implements Runnable{
                 var coord = line.split(":");
                 ObjectLinkedOpenHashSet<Revision> dependents = ObjectLinkedOpenHashSet.of();
                 try {
+
                     dependents =
                         resolver.resolveDependents(coord[0], coord[1], coord[2], -1,
                             transitive);
